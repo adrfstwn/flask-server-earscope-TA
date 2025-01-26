@@ -34,5 +34,8 @@
     ```
     app based
     ```bash
+    pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
+    ```
+    ```bash
     ./dist/run
     ```
