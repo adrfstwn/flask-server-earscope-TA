@@ -20,7 +20,7 @@ RUN pip install pyinstaller
 RUN pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
 
 # Menentukan port yang akan digunakan oleh aplikasi
-EXPOSE 5000
+EXPOSE 5005
 
 # Menjalankan aplikasi Flask
 CMD ["./dist/run"]
