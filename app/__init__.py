@@ -1,5 +1,6 @@
 from flask import Flask
-from .database import init_db
+from .database import init_db    
+from .routes import bp
 
 def earscope_app():
     app = Flask(__name__)
@@ -8,7 +9,6 @@ def earscope_app():
     init_db(app)
 
     # Registrasi blueprint untuk routes
-    from .routes import bp
     app.register_blueprint(bp)
 
     return app
