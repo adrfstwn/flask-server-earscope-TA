@@ -27,6 +27,12 @@
     pip install -r requirements.txt
     ```
 2. Run:
+
+    web based
     ```bash
     flask run
+    ```
+    app based
+    ```bash
+    ./dist/run
     ```
