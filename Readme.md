@@ -3,6 +3,7 @@
 ## Setup Project
 
 1. Create Virtual Environment:
+
     linux
     ```bash
     python3 -m venv venv
@@ -12,6 +13,7 @@
     python -m venv venv
     ```
 1. Use the Virtual Environment:
+
     linux
     ```bash
     source venv/bin/activate
