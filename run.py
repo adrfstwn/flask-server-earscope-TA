@@ -1,10 +1,6 @@
-from app import earscope_app
-from dotenv import load_dotenv
+from app import earscope_app  # Import fungsi untuk membuat app
 
-# Memuat file .env
-load_dotenv()
+app, socketio = earscope_app()
 
-app = earscope_app()
-
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
