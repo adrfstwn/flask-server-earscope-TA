@@ -15,7 +15,7 @@ dist/
 __pycache__/
 
 # migrations
-migrations/
+migrations/*
 
 # video record
-video/
+video/*
