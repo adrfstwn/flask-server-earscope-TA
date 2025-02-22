@@ -1,16 +1,26 @@
 from flask import Flask
 from flask_socketio import SocketIO
-from .database import init_db
 from .routes import bp, register_socketio_events
-import os
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
-def earscope_app():
+db = SQLAlchemy()
+migrate = Migrate()
+socketio = SocketIO(cors_allowed_origins="*")
+
+def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.getenv('APP_KEY', 'default_secret_key')  # Default key jika tidak ada env
-    socketio = SocketIO(app)
-
+    app.config.from_object('config.Config')
+    
     # Inisialisasi database
-    init_db(app)
+    from app import models
+    db.init_app(app)
+    
+    # Setup Migrate 
+    migrate.init_app(app, db)
+    
+    # Setup WebSocket
+    socketio.init_app(app)
 
     # Registrasi blueprint untuk routes
     app.register_blueprint(bp)
@@ -18,4 +28,4 @@ def earscope_app():
     # Registrasi event WebSocket
     register_socketio_events(socketio)
 
-    return app, socketio
+    return app
