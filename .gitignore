@@ -13,9 +13,3 @@ dist/
 *.pyc
 *.pyo
 __pycache__/
-
-# migrations
-migrations/*
-
-# video record
-video/*
