@@ -89,19 +89,18 @@
         <video id="video" autoplay></video>
         <canvas id="canvas"></canvas>
         <div class="controls">
-            <button class="open" onclick="startCamera()">Open</button>
-            <button class="close" onclick="stopCamera()">Close</button>
+            <button class="open" onclick="startRecording()">Open</button>
+            <button class="close" onclick="stopRecording()">Close</button>
         </div>
     </div>
-
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
         let videoStream = null;
         const videoElement = document.getElementById("video");
         const canvasElement = document.getElementById("canvas");
         const ctx = canvasElement.getContext("2d");
-        let sendFrames = false;
-
+        let sendFrames = false; // Status pengiriman frame
+        let isRecording = false; // Status perekaman
         // Inisialisasi WebSocket
         const socket = io();
 
@@ -111,14 +110,12 @@
                 .then((stream) => {
                     videoStream = stream;
                     videoElement.srcObject = stream;
-                    sendFrames = true;
-                    processFrames();
+                    console.log("Kamera dimulai.");
                 })
                 .catch((err) => console.error("Gagal mengakses kamera!", err));
         }
 
         function stopCamera() {
-            sendFrames = false; // Hentikan pengiriman frame
             if (videoStream) {
                 videoStream.getTracks().forEach((track) => track.stop());
                 videoElement.srcObject = null;
@@ -127,45 +124,64 @@
             // Bersihkan video dengan menampilkan layar hitam
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+            console.log("Kamera dihentikan.");
         }
 
         function processFrames() {
             if (!sendFrames || !videoStream) return;
 
+            // Gambar frame dari video ke canvas
             canvasElement.width = videoElement.videoWidth;
             canvasElement.height = videoElement.videoHeight;
             ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
+            // Kirim frame ke backend jika sedang merekam
             const imageData = canvasElement.toDataURL("image/png");
-            console.log("Sending frame to backend:", imageData); // Debugging log
             socket.emit("process_frame", { image: imageData });
 
-            setTimeout(processFrames, 200); // Kirim frame setiap 100ms
+            // Proses frame berikutnya
+            setTimeout(processFrames, 100); // Kirim frame setiap 100ms
+        }
+
+        function startRecording() {
+            if (!videoStream) {
+                alert("Kamera belum dimulai!");
+                return;
+            }
+            sendFrames = true; // Mulai mengirim frame
+            isRecording = true; // Set status perekaman
+            socket.emit("start_recording"); // Kirim event ke backend
+            processFrames(); // Mulai proses frame
+            alert("Perekaman dimulai!");
+        }
+
+        function stopRecording() {
+            sendFrames = false; // Hentikan pengiriman frame
+            isRecording = false; // Reset status perekaman
+            socket.emit("stop_recording"); // Kirim event ke backend
+            alert("Perekaman dihentikan!");
         }
 
         socket.on("processed_frame", (data) => {
-            console.log("Received processed frame from backend:", data); // Debugging log
-
             if (data.error) {
                 console.error("Error:", data.error);
                 return;
             }
-
             if (data.processed_image) {
                 const img = new Image();
                 img.src = data.processed_image;
-
                 img.onload = () => {
-                    console.log("Image loaded successfully"); // Debugging log
                     ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
                     ctx.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
                 };
-
                 img.onerror = () => {
-                    console.error("Failed to load image"); // Debugging log
+                    console.error("Failed to load image");
                 };
             }
         });
+
+        // Mulai kamera saat halaman dimuat
+        startCamera();
     </script>
 </body>
 </html>
