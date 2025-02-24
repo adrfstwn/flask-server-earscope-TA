@@ -20,6 +20,11 @@ class EarScopeModel:
         self.frame_height = 480
         self.fps = 20
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        
+        # Tambahkan atribut untuk menyimpan nama file
+        self.raw_filename = None
+        self.bbox_filename = None
+        
         # Inisialisasi video writer
         self.video_writer_raw = None
         self.video_writer_bbox = None
@@ -30,22 +35,36 @@ class EarScopeModel:
         if not self.is_recording:
             self.is_recording = True
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            raw_filename = os.path.join(output_dir, f"raw_{timestamp}.mp4")
-            bbox_filename = os.path.join(output_dir, f"bbox_{timestamp}.mp4")
-            self.video_writer_raw = cv2.VideoWriter(raw_filename, self.fourcc, self.fps, (self.frame_width, self.frame_height))
-            self.video_writer_bbox = cv2.VideoWriter(bbox_filename, self.fourcc, self.fps, (self.frame_width, self.frame_height))
-            print(f"Perekaman dimulai: {raw_filename}, {bbox_filename}")
+
+            self.raw_filename = os.path.join(output_dir, f"raw_{timestamp}.mp4")
+            self.bbox_filename = os.path.join(output_dir, f"bbox_{timestamp}.mp4")
+
+            self.video_writer_raw = cv2.VideoWriter(self.raw_filename, self.fourcc, self.fps, (self.frame_width, self.frame_height))
+            self.video_writer_bbox = cv2.VideoWriter(self.bbox_filename, self.fourcc, self.fps, (self.frame_width, self.frame_height))
+
+            print(f"Perekaman dimulai: {self.raw_filename}, {self.bbox_filename}")
+
 
     def stop_recording(self):
         """Hentikan perekaman video"""
         if self.is_recording:
             self.is_recording = False
+
             if self.video_writer_raw is not None:
                 self.video_writer_raw.release()
             if self.video_writer_bbox is not None:
                 self.video_writer_bbox.release()
+
+            # # Kirim nama file ke frontend sebelum di-reset
+            # if self.raw_filename and self.bbox_filename:
+            #     socketio.emit("video_saved", {"raw": self.raw_filename, "bbox": self.bbox_filename})
+
+            # Reset filename setelah dikirim
             self.video_writer_raw = None
             self.video_writer_bbox = None
+            self.raw_filename = None
+            self.bbox_filename = None
+
             print("Perekaman dihentikan.")
 
     def process_image(self, img):

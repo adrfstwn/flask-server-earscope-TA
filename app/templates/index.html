@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Real-Time Kamera</title>
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/js/all.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -22,8 +23,8 @@
       }
       .camera-container {
         width: 98vw;
-        height: 90vh;
-        border: 4px dashed white;
+        height: 96vh;
+        border: 8px solid white;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -32,20 +33,21 @@
         position: relative;
         padding: 15px;
         overflow: hidden;
+        border-radius: 12px;
       }
       .logo-container {
         position: absolute;
-        top: 10px;
-        left: 10px;
+        top: 15px;
+        left: 15px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 7px 12px;
-        border-radius: 6px;
+        gap: 15px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 15px;
+        border-radius: 8px;
       }
       .logo-container img {
-        height: 30px;
+        height: 40px;
       }
       video,
       canvas {
@@ -63,20 +65,72 @@
         gap: 20px;
       }
       button {
-        padding: 20px 40px;
-        font-size: 25px;
+        padding: 20px 55px;
+        font-size: 24px;
         cursor: pointer;
-        border-radius: 10px;
+        border-radius: 16px;
         border: none;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
       .open {
-        background-color: blue;
+        background-color: #007bff;
         color: white;
       }
       .close {
-        background-color: red;
+        background-color: #dc3545;
         color: white;
+      }
+      .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        width: 60%;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .popup button {
+        margin-top: 20px;
+        padding: 15px 30px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: bold;
+        transition: 0.2s;
+      }
+
+      .popup button:hover {
+        background: #0056b3;
+      }
+
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        z-index: 10;
+      }
+
+      .show {
+        display: block;
       }
     </style>
   </head>
@@ -95,9 +149,17 @@
       <video id="video" autoplay></video>
       <canvas id="canvas"></canvas>
       <div class="controls">
-        <button class="open" onclick="startCamera()">Open</button>
-        <button class="close" onclick="stopCamera()">Close</button>
+        <button class="open" onclick="startCamera()">
+          <i class="fas fa-video"></i> Start
+        </button>
+        <button class="close" onclick="stopCamera()">
+          <i class="fas fa-stop"></i> Stop
+        </button>
       </div>
+    </div>
+    <div class="popup" id="popup">
+      <p>Video recording has been saved!</p>
+      <button onclick="resetPage()">OK</button>
     </div>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
@@ -129,7 +191,18 @@
           videoStream = null;
           console.log("Kamera dihentikan.");
         }
+        document.getElementById("popup").style.display = "block";
         stopRecording();
+      }
+
+      function showPopup() {
+        document.getElementById("popup").classList.add("show");
+        document.getElementById("overlay").classList.add("show");
+      }
+
+      function closePopup() {
+        document.getElementById("popup").classList.remove("show");
+        document.getElementById("overlay").classList.remove("show");
       }
 
       function processFrames() {
@@ -166,6 +239,19 @@
         console.log("Perekaman dihentikan.");
         ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
       }
+      function showNotification(message) {
+        const notification = document.getElementById("notification");
+        notification.innerText = message;
+        notification.style.display = "block";
+        notification.style.opacity = "1";
+
+        setTimeout(() => {
+          notification.style.opacity = "0";
+          setTimeout(() => {
+            notification.style.display = "none";
+          }, 500);
+        }, 2000);
+      }
 
       socket.on("processed_frame", (data) => {
         if (data.error) {
@@ -188,6 +274,10 @@
           };
         }
       });
+
+      function resetPage() {
+        document.getElementById("popup").style.display = "none";
+      }
     </script>
   </body>
 </html>
