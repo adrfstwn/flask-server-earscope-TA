@@ -1,0 +1,15 @@
+services:
+  earscope-model:
+    image: earscope-model:latest
+    build:
+      context: .
+    container_name: earscope-model
+  ports:
+    - "5005:5005"
+  restart: always
+  networks:
+    mysql-network
+
+networks:
+  mysql-network:
+    external: true
