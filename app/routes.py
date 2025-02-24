@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template
-from flask_socketio import emit
-from .detector import process_frame_with_model, start_recording, stop_recording
+from app.detector import process_frame_with_model, start_recording, stop_recording
 
 bp = Blueprint('main', __name__)
 
@@ -10,18 +9,20 @@ def index_page():
 
 # Fungsi untuk menangani event WebSocket
 def handle_process_frame(data):
+    from app import socketio  # Tambahkan ini agar `emit` berfungsi
+    from flask_socketio import emit
     try:
         image_data = data.get('image')
         if not image_data:
-            emit('processed_frame', {'error': 'No image data provided'})
+            socketio.emit('processed_frame', {'error': 'No image data provided'})  # <--- Gunakan `socketio.emit`
             return
         print("Processing frame...")  # Debugging log
         processed_image = process_frame_with_model(image_data)
         print("Sending processed frame back to frontend")  # Debugging log
-        emit('processed_frame', {'processed_image': processed_image})
+        socketio.emit('processed_frame', {'processed_image': processed_image})  # <--- Gunakan `socketio.emit`
     except Exception as e:
         print(f"Error processing frame: {e}")  # Debugging log
-        emit('processed_frame', {'error': str(e)})
+        socketio.emit('processed_frame', {'error': str(e)})  # <--- Gunakan `socketio.emit`
 
 # Registrasi event WebSocket
 def register_socketio_events(socketio):
@@ -39,10 +40,3 @@ def register_socketio_events(socketio):
     def handle_stop_recording():
         print("Stopping recording...")
         stop_recording()
-
-# @bp.route('/test-db', methods=['GET'])
-# def test_db():
-#     result = test_db_connection()
-#     if isinstance(result, dict):
-#         return jsonify(result), 500
-#     return jsonify({"message": result}), 200
