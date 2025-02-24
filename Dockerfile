@@ -1,8 +1,10 @@
 # Menggunakan image Python sebagai base image
 FROM python:3.12.3-slim
 
-# Install binutils untuk mendukung PyInstaller
-RUN apt-get update && apt-get install -y binutils
+# Install dependencies yang dibutuhkan OpenCV dan PyInstaller
+RUN apt-get update && apt-get install -y \
+    binutils \
+    libgl1
 
 # Set working directory
 WORKDIR /app
