@@ -28,7 +28,7 @@
     ```
 2. Run:
 
-    web based
+    web basedd
     ```bash
     flask run
     ```
