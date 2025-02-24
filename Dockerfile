@@ -1,6 +1,9 @@
 # Menggunakan image Python sebagai base image
 FROM python:3.12.3-slim
 
+# Install binutils untuk mendukung PyInstaller
+RUN apt-get update && apt-get install -y binutils
+
 # Set working directory
 WORKDIR /app
 
