@@ -1,187 +1,193 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Real-Time Kamera</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            text-align: center;
-            position: relative;
-        }
-        .camera-container {
-            width: 98vw;
-            height: 90vh;
-            border: 4px dashed white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            position: relative;
-            padding: 15px;
-            overflow: hidden;
-        }
-        .logo-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 7px 12px;
-            border-radius: 6px;
-        }
-        .logo-container img {
-            height: 30px;
-        }
-        video,
-        canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        .controls {
-            position: absolute;
-            bottom: 20px;
-            display: flex;
-            gap: 20px;
-        }
-        button {
-            padding: 20px 40px;
-            font-size: 25px;
-            cursor: pointer;
-            border-radius: 10px;
-            border: none;
-            font-weight: bold;
-        }
-        .open {
-            background-color: blue;
-            color: white;
-        }
-        .close {
-            background-color: red;
-            color: white;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        text-align: center;
+        position: relative;
+      }
+      .camera-container {
+        width: 98vw;
+        height: 90vh;
+        border: 4px dashed white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        position: relative;
+        padding: 15px;
+        overflow: hidden;
+      }
+      .logo-container {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 7px 12px;
+        border-radius: 6px;
+      }
+      .logo-container img {
+        height: 30px;
+      }
+      video,
+      canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .controls {
+        position: absolute;
+        bottom: 20px;
+        display: flex;
+        gap: 20px;
+      }
+      button {
+        padding: 20px 40px;
+        font-size: 25px;
+        cursor: pointer;
+        border-radius: 10px;
+        border: none;
+        font-weight: bold;
+      }
+      .open {
+        background-color: blue;
+        color: white;
+      }
+      .close {
+        background-color: red;
+        color: white;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="camera-container" id="cameraFrame">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/d3ti.png') }}" alt="D3TI Logo" />
-            <img src="{{ url_for('static', filename='images/uns.png') }}" alt="UNS Logo" />
-        </div>
-        <video id="video" autoplay></video>
-        <canvas id="canvas"></canvas>
-        <div class="controls">
-            <button class="open" onclick="startRecording()">Open</button>
-            <button class="close" onclick="stopRecording()">Close</button>
-        </div>
+      <div class="logo-container">
+        <img
+          src="{{ url_for('static', filename='images/d3ti.png') }}"
+          alt="D3TI Logo"
+        />
+        <img
+          src="{{ url_for('static', filename='images/uns.png') }}"
+          alt="UNS Logo"
+        />
+      </div>
+      <video id="video" autoplay></video>
+      <canvas id="canvas"></canvas>
+      <div class="controls">
+        <button class="open" onclick="startCamera()">Open</button>
+        <button class="close" onclick="stopCamera()">Close</button>
+      </div>
     </div>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
-        let videoStream = null;
-        const videoElement = document.getElementById("video");
-        const canvasElement = document.getElementById("canvas");
-        const ctx = canvasElement.getContext("2d");
-        let sendFrames = false; // Status pengiriman frame
-        let isRecording = false; // Status perekaman
-        // Inisialisasi WebSocket
-        const socket = io();
+      const videoElement = document.getElementById("video");
+      const canvasElement = document.getElementById("canvas");
+      const ctx = canvasElement.getContext("2d");
 
-        function startCamera() {
-            navigator.mediaDevices
-                .getUserMedia({ video: true })
-                .then((stream) => {
-                    videoStream = stream;
-                    videoElement.srcObject = stream;
-                    console.log("Kamera dimulai.");
-                })
-                .catch((err) => console.error("Gagal mengakses kamera!", err));
+      let videoStream = null;
+      let sendFrames = false;
+      const socket = io();
+
+      function startCamera() {
+        if (videoStream) return;
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            videoStream = stream;
+            videoElement.srcObject = stream;
+            console.log("Kamera dimulai.");
+            startRecording();
+          })
+          .catch((err) => console.error("Gagal mengakses kamera!", err));
+      }
+
+      function stopCamera() {
+        if (videoStream) {
+          videoStream.getTracks().forEach((track) => track.stop());
+          videoElement.srcObject = null;
+          videoStream = null;
+          console.log("Kamera dihentikan.");
+        }
+        stopRecording();
+      }
+
+      function processFrames() {
+        if (!sendFrames || !videoStream) return;
+
+        canvasElement.width = videoElement.videoWidth;
+        canvasElement.height = videoElement.videoHeight;
+        ctx.drawImage(
+          videoElement,
+          0,
+          0,
+          canvasElement.width,
+          canvasElement.height
+        );
+
+        const imageData = canvasElement.toDataURL("image/jpeg", 0.7); // Kirim dalam format JPEG (lebih cepat)
+        socket.emit("process_frame", { image: imageData });
+
+        setTimeout(processFrames, 100); // Kurangi kecepatan untuk menghindari lag
+      }
+
+      function startRecording() {
+        if (!videoStream || sendFrames) return;
+        sendFrames = true;
+        socket.emit("start_recording");
+        console.log("Perekaman dimulai.");
+        processFrames();
+      }
+
+      function stopRecording() {
+        if (!sendFrames) return;
+        sendFrames = false;
+        socket.emit("stop_recording");
+        console.log("Perekaman dihentikan.");
+        ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+
+      socket.on("processed_frame", (data) => {
+        if (data.error) {
+          console.error("Error dari backend:", data.error);
+          return;
         }
 
-        function stopCamera() {
-            if (videoStream) {
-                videoStream.getTracks().forEach((track) => track.stop());
-                videoElement.srcObject = null;
-                videoStream = null;
-            }
-            // Bersihkan video dengan menampilkan layar hitam
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-            console.log("Kamera dihentikan.");
+        if (data.processed_image) {
+          console.log("Menerima frame hasil proses dari backend.");
+          const img = new Image();
+          img.src = data.processed_image;
+
+          img.onload = () => {
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            ctx.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
+          };
+
+          img.onerror = () => {
+            console.error("Gagal memuat gambar hasil processing.");
+          };
         }
-
-        function processFrames() {
-            if (!sendFrames || !videoStream) return;
-
-            // Gambar frame dari video ke canvas
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
-            ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-
-            // Kirim frame ke backend jika sedang merekam
-            const imageData = canvasElement.toDataURL("image/png");
-            socket.emit("process_frame", { image: imageData });
-
-            // Proses frame berikutnya
-            setTimeout(processFrames, 100); // Kirim frame setiap 100ms
-        }
-
-        function startRecording() {
-            if (!videoStream) {
-                alert("Kamera belum dimulai!");
-                return;
-            }
-            sendFrames = true; // Mulai mengirim frame
-            isRecording = true; // Set status perekaman
-            socket.emit("start_recording"); // Kirim event ke backend
-            processFrames(); // Mulai proses frame
-            alert("Perekaman dimulai!");
-        }
-
-        function stopRecording() {
-            sendFrames = false; // Hentikan pengiriman frame
-            isRecording = false; // Reset status perekaman
-            socket.emit("stop_recording"); // Kirim event ke backend
-            alert("Perekaman dihentikan!");
-        }
-
-        socket.on("processed_frame", (data) => {
-            if (data.error) {
-                console.error("Error:", data.error);
-                return;
-            }
-            if (data.processed_image) {
-                const img = new Image();
-                img.src = data.processed_image;
-                img.onload = () => {
-                    ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                    ctx.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
-                };
-                img.onerror = () => {
-                    console.error("Failed to load image");
-                };
-            }
-        });
-
-        // Mulai kamera saat halaman dimuat
-        startCamera();
+      });
     </script>
-</body>
+  </body>
 </html>

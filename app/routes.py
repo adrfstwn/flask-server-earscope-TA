@@ -9,20 +9,27 @@ def index_page():
 
 # Fungsi untuk menangani event WebSocket
 def handle_process_frame(data):
-    from app import socketio  # Tambahkan ini agar `emit` berfungsi
-    from flask_socketio import emit
+    from app import socketio 
     try:
         image_data = data.get('image')
         if not image_data:
-            socketio.emit('processed_frame', {'error': 'No image data provided'})  # <--- Gunakan `socketio.emit`
+            socketio.emit('processed_frame', {'error': 'No image data provided'})
             return
-        print("Processing frame...")  # Debugging log
-        processed_image = process_frame_with_model(image_data)
-        print("Sending processed frame back to frontend")  # Debugging log
-        socketio.emit('processed_frame', {'processed_image': processed_image})  # <--- Gunakan `socketio.emit`
+        
+        print("Processing frame...")  # Debug log
+        processed_image = process_frame_with_model(image_data)  # Proses gambar
+
+        if processed_image:
+            print("Sending processed frame back to frontend")  # Debug log
+            socketio.emit('processed_frame', {'processed_image': processed_image})  # Kirim segera ke frontend
+        else:
+            print("Failed to process frame.")  # Debug log
+            socketio.emit('processed_frame', {'error': 'Frame processing failed'})
+
     except Exception as e:
-        print(f"Error processing frame: {e}")  # Debugging log
-        socketio.emit('processed_frame', {'error': str(e)})  # <--- Gunakan `socketio.emit`
+        print(f"Error processing frame: {e}")
+        socketio.emit('processed_frame', {'error': str(e)})
+
 
 # Registrasi event WebSocket
 def register_socketio_events(socketio):

@@ -51,23 +51,25 @@ class EarScopeModel:
     def process_image(self, img):
         """Proses deteksi wajah dan simpan frame ke video"""
         try:
-            # Resize frame agar sesuai dengan ukuran video
             img = cv2.resize(img, (self.frame_width, self.frame_height))
             raw_frame = img.copy()
-            # Konversi ke grayscale untuk deteksi wajah
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            # Deteksi wajah dengan parameter lebih ringan
+
             faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=3, minSize=(30, 30))
-            # Gambar bounding box
+
             for (x, y, w, h) in faces:
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            # Simpan frame ke video jika sedang merekam
+
+            # Simpan ke video saat sedang merekam
             if self.is_recording:
                 self.save_video_frames(raw_frame, img)
-            return img  # Return frame yang sudah diproses
+
+            return img  # Langsung return frame yang sudah diproses
+
         except Exception as e:
             print(f"Error processing image: {e}")
             return None
+
 
     def save_video_frames(self, raw_frame, bbox_frame):
         """Simpan frame mentah dan frame dengan bounding box ke dalam video"""
