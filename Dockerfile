@@ -4,7 +4,12 @@ FROM python:3.12.3-slim
 # Install dependencies yang dibutuhkan OpenCV dan PyInstaller
 RUN apt-get update && apt-get install -y \
     binutils \
-    libgl1
+    libgl1 \
+    libglib2.0-0 \
+    libgthread-2.0-0 \
+    libsm6 \
+    libice6 \
+    && rm -rf /var/lib/apt/lists/*  # Membersihkan cache apt
 
 # Set working directory
 WORKDIR /app
