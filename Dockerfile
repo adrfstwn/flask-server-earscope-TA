@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     binutils \
     libgl1 \
     libglib2.0-0 \
-    libgthread-2.0-0 \
     libsm6 \
     libice6 \
     && rm -rf /var/lib/apt/lists/*  # Membersihkan cache apt
