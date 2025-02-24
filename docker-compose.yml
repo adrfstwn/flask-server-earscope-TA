@@ -8,7 +8,7 @@ services:
       - "5005:5005"
     restart: always
     networks:
-      mysql-network
+      - mysql-network
 
 networks:
   mysql-network:
