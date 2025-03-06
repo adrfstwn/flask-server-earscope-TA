@@ -1,7 +1,8 @@
 import cv2
 import os
+import requests
 from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
@@ -29,6 +30,13 @@ class EarScopeModel:
         self.video_writer_raw = None
         self.video_writer_bbox = None
         self.is_recording = False  # Status perekaman
+        
+        # Api send
+        self.api_url = "https://api.earscope.adrfstwn.cloud/v1/videos"
+        # self.headers = {
+        #     "accept": "application/json",
+        #     "X-CSRF-TOKEN": "7bOm8BKiwnNgkMfViMJ85ndn7AXQlZfZNBqICiH1"
+        # }
 
     def start_recording(self):
         """Mulai perekaman video"""
@@ -55,18 +63,17 @@ class EarScopeModel:
             if self.video_writer_bbox is not None:
                 self.video_writer_bbox.release()
 
-            # # Kirim nama file ke frontend sebelum di-reset
-            # if self.raw_filename and self.bbox_filename:
-            #     socketio.emit("video_saved", {"raw": self.raw_filename, "bbox": self.bbox_filename})
+            print("Perekaman dihentikan.")
+            
+            # Kirim ke API setelah perekaman selesai
+            self.send_to_api()
 
             # Reset filename setelah dikirim
             self.video_writer_raw = None
             self.video_writer_bbox = None
             self.raw_filename = None
             self.bbox_filename = None
-
-            print("Perekaman dihentikan.")
-
+            
     def process_image(self, img):
         """Proses deteksi wajah dan simpan frame ke video"""
         try:
@@ -95,3 +102,31 @@ class EarScopeModel:
         if self.video_writer_raw is not None and self.video_writer_bbox is not None:
             self.video_writer_raw.write(raw_frame)
             self.video_writer_bbox.write(bbox_frame)
+            
+    def send_to_api(self):
+        """Mengirim video yang direkam ke API setelah perekaman selesai"""
+        if not self.raw_filename or not self.bbox_filename:
+            print("Gagal mengirim video: Nama file tidak ditemukan!")
+            return
+
+        if not os.path.exists(self.raw_filename) or not os.path.exists(self.bbox_filename):
+            print("Gagal mengirim video: File tidak ditemukan!")
+            return
+
+        with open(self.raw_filename, "rb") as raw_video, open(self.bbox_filename, "rb") as processed_video:
+            files = {
+                "raw_video": (os.path.basename(self.raw_filename), raw_video, "video/mp4"),
+                "processed_video": (os.path.basename(self.bbox_filename), processed_video, "video/mp4"),
+            }
+
+            try:
+                #response = requests.post(self.api_url, headers=self.headers, files=files)
+                response = requests.post(self.api_url, files=files)
+                if response.status_code == 201:
+                    print("Video berhasil dikirim ke API!")
+                    print(f"API Response: {response.json()}")
+                else:
+                    print(f"Gagal mengirim video: {response.status_code}, {response.text}")
+
+            except requests.RequestException as e:
+                print(f"Error mengirim video: {e}")
