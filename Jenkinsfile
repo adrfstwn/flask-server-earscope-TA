@@ -35,7 +35,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to VPS Two') {
+        stage('Deploy to VPS Earscope') {
             steps {
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: 'vps-earscope', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
