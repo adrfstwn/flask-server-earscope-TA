@@ -32,4 +32,4 @@ RUN pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/s
 EXPOSE 5000
 
 # Menjalankan aplikasi dengan Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "-k", "gevent", "-w", "1", "-b", "0.0.0.0:5000", "run:app"]

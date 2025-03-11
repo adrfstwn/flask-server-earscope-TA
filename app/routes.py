@@ -1,7 +1,16 @@
-from flask import Blueprint, render_template
+import os
+from flask import Blueprint, render_template, send_from_directory, current_app
 from app.detector import process_frame_with_model, start_recording, stop_recording
 
 bp = Blueprint('main', __name__)
+
+@bp.route('/service-worker.js')
+def service_worker():
+    return send_from_directory('static', 'service-worker.js')
+
+@bp.route('/manifest.json')
+def manifest():
+    return send_from_directory(os.path.dirname(current_app.root_path), 'manifest.json')
 
 @bp.route('/', methods=['GET'])
 def index_page():
