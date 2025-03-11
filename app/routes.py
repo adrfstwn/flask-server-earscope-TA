@@ -10,7 +10,8 @@ def service_worker():
 
 @bp.route('/manifest.json')
 def manifest():
-    return send_from_directory(os.path.dirname(current_app.root_path), 'manifest.json')
+    return send_from_directory('static', 'manifest.json')
+    # return send_from_directory(os.path.dirname(current_app.root_path), 'manifest.json')
 
 @bp.route('/', methods=['GET'])
 def index_page():
