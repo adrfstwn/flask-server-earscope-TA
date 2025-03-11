@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Menambahkan PyInstaller ke environment
-RUN pip install pyinstaller
+# RUN pip install pyinstaller
 
 # Membuat aplikasi dengan PyInstaller
 # RUN pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
