@@ -4,6 +4,7 @@ pipeline {
         IMAGE_TAG = "${env.BUILD_ID}"
         GIT_BRANCH = "main"
         DOCKER_IMAGE_NAME = "earscope-model"
+        REMOTE_WORKDIR = "/root/flask-server-earscope-TA"
     }
     stages {
         stage('Checkout Code') {
@@ -34,55 +35,48 @@ pipeline {
                 }
             }
         }
-        stage('Stop Running Containers') {
+        stage('Deploy to VPS Two') {
             steps {
                 script {
-                    sh """
-                    echo "Stopping running container..."
-                    
-                    cd flask-server-earscope-TA
-                    
-                    if docker ps -a | grep earscope-model; then
-                        docker compose down || true
-                    fi
+                    withCredentials([sshUserPrivateKey(credentialsId: 'vps2-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                        sh """
+                        echo "Copying project files to VPS..."
+                        rsync -avz -e "ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no" flask-server-earscope-TA/ \${SSH_USER}@103.155.246.50:${REMOTE_WORKDIR}
 
-                    echo "Checking if old image exists..."
-                    OLD_IMAGE_ID=\$(docker images -q ${DOCKER_IMAGE_NAME})
+                        echo "Running deployment commands on VPS..."
+                        ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no \${SSH_USER}@103.155.246.50 << EOF
+                            cd ${REMOTE_WORKDIR}
 
-                    if [ ! -z "\$OLD_IMAGE_ID" ]; then
-                        echo "Deleting old image..."
-                        docker rmi -f \$OLD_IMAGE_ID
-                    else
-                        echo "No old image found, skipping delete step."
-                    fi
-                    """
-                }
-            }
-        }
-        stage('Build & Deploy Docker Image') {
-            steps {
-                script {
-                    sh """
-                    echo "Updating docker-compose.yml with new image tag..."
-                    
-                    cd flask-server-earscope-TA
-                    
-                    # Update image tag in docker-compose.yml
-                    sed -i "s|image:.*|image: ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}|" docker-compose.yml
-                    
-                    echo "Final docker-compose.yml content:"
-                    cat docker-compose.yml
-                    
-                    echo "Building Docker image locally..."
-                    docker compose build --no-cache
-                    
-                    echo "Deploying container using docker compose..."
-                    docker compose up -d --force-recreate
-                    
-                    echo "Checking working directory in the container..."
-                    docker exec earscope-model pwd
-                    docker exec earscope-model ls -al /app
-                    """
+                            echo "Stopping running containers..."
+                            if docker ps -a | grep earscope-model; then
+                                docker compose down || true
+                            fi
+
+                            echo "Checking if old image exists..."
+                            OLD_IMAGE_ID=\$(docker images -q ${DOCKER_IMAGE_NAME})
+
+                            if [ ! -z "\$OLD_IMAGE_ID" ]; then
+                                echo "Deleting old image..."
+                                docker rmi -f \$OLD_IMAGE_ID
+                            else
+                                echo "No old image found, skipping delete step."
+                            fi
+
+                            echo "Updating docker-compose.yml with new image tag..."
+                            sed -i "s|image:.*|image: ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}|" docker-compose.yml
+
+                            echo "Building Docker image..."
+                            docker compose build --no-cache
+
+                            echo "Deploying container..."
+                            docker compose up -d --force-recreate
+
+                            echo "Checking working directory in the container..."
+                            docker exec earscope-model pwd
+                            docker exec earscope-model ls -al /app
+                        EOF
+                        """
+                    }
                 }
             }
         }
