@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 from flask import Flask
 from flask_socketio import SocketIO
+from config import Config
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -33,11 +34,7 @@ class EarScopeModel:
         self.is_recording = False  # Status perekaman
         
         # Api send
-        self.api_url = "https://api.earscope.adrfstwn.cloud/v1/videos"
-        # self.headers = {
-        #     "accept": "application/json",
-        #     "X-CSRF-TOKEN": "7bOm8BKiwnNgkMfViMJ85ndn7AXQlZfZNBqICiH1"
-        # }
+        self.api_url = Config.API_SEND_VIDEO_URL
 
     def start_recording(self):
         """Mulai perekaman video"""
