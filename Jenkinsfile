@@ -44,7 +44,7 @@ pipeline {
                         rsync -avz -e "ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no -p 9802" flask-server-earscope-TA/ \${SSH_USER}@103.155.246.50:${REMOTE_WORKDIR}
 
                         echo "Running deployment commands on VPS..."
-                        ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no \${SSH_USER}@103.155.246.50 << EOF
+                        ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no -p 9802 \${SSH_USER}@103.155.246.50 << EOF
                             cd ${REMOTE_WORKDIR}
 
                             echo "Stopping running containers..."
