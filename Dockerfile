@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libsm6 \
     libice6 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*  # Membersihkan cache apt
 
 # Set working directory
