@@ -33,4 +33,4 @@ COPY . .
 EXPOSE 5000
 
 # Menjalankan aplikasi dengan Gunicorn
-CMD ["gunicorn", "-k", "gevent", "-w", "1", "-b", "0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "-k", "gevent", "-w", "2", "-b", "0.0.0.0:5000", "run:app"]
