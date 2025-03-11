@@ -7,9 +7,3 @@ services:
     ports:
       - "5000:5000"
     restart: always
-    networks:
-      - mysql-network
-
-networks:
-  mysql-network:
-    external: true
