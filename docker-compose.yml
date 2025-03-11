@@ -5,7 +5,7 @@ services:
       context: .
     container_name: earscope-model
     ports:
-      - "5005:5005"
+      - "5000:5000"
     restart: always
     networks:
       - mysql-network
