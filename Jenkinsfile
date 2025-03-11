@@ -4,7 +4,7 @@ pipeline {
         IMAGE_TAG = "${env.BUILD_ID}"
         GIT_BRANCH = "main"
         DOCKER_IMAGE_NAME = "earscope-model"
-        REMOTE_WORKDIR = "/root/flask-server-earscope-TA"
+        REMOTE_WORKDIR = "/var/www/flask-server-earscope-TA"
     }
     stages {
         stage('Checkout Code') {
