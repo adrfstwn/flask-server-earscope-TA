@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Real-Time Kamera</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/js/all.min.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
@@ -15,135 +16,14 @@
           );
       }
     </script>
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.8);
-        text-align: center;
-        position: relative;
-      }
-      .camera-container {
-        width: 98vw;
-        height: 96vh;
-        border: 8px solid white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.1);
-        position: relative;
-        padding: 15px;
-        overflow: hidden;
-        border-radius: 12px;
-      }
-      .logo-container {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 10px 15px;
-        border-radius: 8px;
-      }
-      .logo-container img {
-        height: 40px;
-      }
-      video,
-      canvas {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-      .controls {
-        position: absolute;
-        bottom: 20px;
-        display: flex;
-        gap: 20px;
-      }
-      button {
-        padding: 20px 55px;
-        font-size: 24px;
-        cursor: pointer;
-        border-radius: 16px;
-        border: none;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .open {
-        background-color: #007bff;
-        color: white;
-      }
-      .close {
-        background-color: #dc3545;
-        color: white;
-      }
-      .popup {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 255, 255, 0.95);
-        width: 60%;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-        text-align: center;
-        font-size: 22px;
-        font-weight: bold;
-        transition: all 0.3s ease-in-out;
-      }
-
-      .popup button {
-        margin-top: 20px;
-        padding: 15px 30px;
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 20px;
-        font-weight: bold;
-        transition: 0.2s;
-      }
-
-      .popup button:hover {
-        background: #0056b3;
-      }
-
-      .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(5px);
-        z-index: 10;
-      }
-
-      .show {
-        display: block;
-      }
-    </style>
+    <link
+      rel="manifest"
+      href="{{ url_for('static', filename='manifest.json') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
   </head>
   <body>
     <div class="camera-container" id="cameraFrame">
@@ -169,126 +49,12 @@
       </div>
     </div>
     <div class="popup" id="popup">
-      <p>Video recording has been saved!</p>
-      <button onclick="resetPage()">OK</button>
+      <button onclick="resetPage()">
+        <i class="fas fa-sync-alt"></i>
+      </button>
     </div>
+
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script>
-      const videoElement = document.getElementById("video");
-      const canvasElement = document.getElementById("canvas");
-      const ctx = canvasElement.getContext("2d");
-
-      let videoStream = null;
-      let sendFrames = false;
-      const socket = io();
-
-      function startCamera() {
-        if (videoStream) return;
-        navigator.mediaDevices
-          .getUserMedia({ video: true })
-          .then((stream) => {
-            videoStream = stream;
-            videoElement.srcObject = stream;
-            console.log("Kamera dimulai.");
-            startRecording();
-          })
-          .catch((err) => console.error("Gagal mengakses kamera!", err));
-      }
-
-      function stopCamera() {
-        if (videoStream) {
-          videoStream.getTracks().forEach((track) => track.stop());
-          videoElement.srcObject = null;
-          videoStream = null;
-          console.log("Kamera dihentikan.");
-        }
-        document.getElementById("popup").style.display = "block";
-        stopRecording();
-      }
-
-      function showPopup() {
-        document.getElementById("popup").classList.add("show");
-        document.getElementById("overlay").classList.add("show");
-      }
-
-      function closePopup() {
-        document.getElementById("popup").classList.remove("show");
-        document.getElementById("overlay").classList.remove("show");
-      }
-
-      function processFrames() {
-        if (!sendFrames || !videoStream) return;
-
-        canvasElement.width = videoElement.videoWidth;
-        canvasElement.height = videoElement.videoHeight;
-        ctx.drawImage(
-          videoElement,
-          0,
-          0,
-          canvasElement.width,
-          canvasElement.height
-        );
-
-        const imageData = canvasElement.toDataURL("image/jpeg", 0.7); // Kirim dalam format JPEG (lebih cepat)
-        socket.emit("process_frame", { image: imageData });
-
-        setTimeout(processFrames, 100); // Kurangi kecepatan untuk menghindari lag
-      }
-
-      function startRecording() {
-        if (!videoStream || sendFrames) return;
-        sendFrames = true;
-        socket.emit("start_recording");
-        console.log("Perekaman dimulai.");
-        processFrames();
-      }
-
-      function stopRecording() {
-        if (!sendFrames) return;
-        sendFrames = false;
-        socket.emit("stop_recording");
-        console.log("Perekaman dihentikan.");
-        ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-      }
-      function showNotification(message) {
-        const notification = document.getElementById("notification");
-        notification.innerText = message;
-        notification.style.display = "block";
-        notification.style.opacity = "1";
-
-        setTimeout(() => {
-          notification.style.opacity = "0";
-          setTimeout(() => {
-            notification.style.display = "none";
-          }, 500);
-        }, 2000);
-      }
-
-      socket.on("processed_frame", (data) => {
-        if (data.error) {
-          console.error("Error dari backend:", data.error);
-          return;
-        }
-
-        if (data.processed_image) {
-          console.log("Menerima frame hasil proses dari backend.");
-          const img = new Image();
-          img.src = data.processed_image;
-
-          img.onload = () => {
-            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            ctx.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
-          };
-
-          img.onerror = () => {
-            console.error("Gagal memuat gambar hasil processing.");
-          };
-        }
-      });
-
-      function resetPage() {
-        document.getElementById("popup").style.display = "none";
-      }
-    </script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
   </body>
 </html>

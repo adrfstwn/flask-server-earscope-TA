@@ -1,0 +1,142 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  position: relative;
+}
+.camera-container {
+  width: 98vw;
+  height: 96vh;
+  border: 8px solid white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  padding: 15px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.logo-container {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+.logo-container img {
+  height: 40px;
+}
+video,
+canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.controls {
+  position: absolute;
+  bottom: 20px;
+  display: flex;
+  gap: 20px;
+}
+button {
+  padding: 20px 55px;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 16px;
+  border: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.open {
+  background-color: #007bff;
+  color: white;
+}
+.close {
+  background-color: #dc3545;
+  color: white;
+}
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+}
+.show {
+  display: block;
+}
+.popup {
+  display: none; /* Default: tersembunyi */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+  z-index: 1000;
+}
+
+.popup.show {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.popup button {
+  background: none; /* Hapus background */
+  border: none; /* Hapus border */
+  cursor: pointer;
+  font-size: 80px; /* Perbesar ikon */
+  color: white; /* Pastikan warna ikon tetap putih */
+  transition: transform 0.2s ease-in-out;
+}
+
+.popup button:hover {
+  transform: scale(1.2); /* Efek zoom saat hover */
+}
+
+/* .popup button {
+    padding: 15px 30px;
+    background: #0ac400;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 30px;
+    font-weight: bold;
+    transition: 0.2s;
+    margin-top: 10px;
+  }
+  
+  .popup button:hover {
+    background: #0056b3;
+  } */
