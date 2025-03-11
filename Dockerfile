@@ -26,7 +26,7 @@ COPY . .
 RUN pip install pyinstaller
 
 # Membuat aplikasi dengan PyInstaller
-RUN pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
+# RUN pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
 
 # Menentukan port yang akan digunakan oleh aplikasi
 EXPOSE 5000
