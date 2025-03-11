@@ -21,8 +21,8 @@ class EarScopeModel:
         self.frame_width = 640
         self.frame_height = 480
         self.fps = 20
-        self.fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-        #self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        #self.fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
         
         # Tambahkan atribut untuk menyimpan nama file
         self.raw_filename = None
