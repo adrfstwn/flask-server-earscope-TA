@@ -5,6 +5,7 @@ from datetime import datetime
 from flask import Flask
 from flask_socketio import SocketIO
 from config import Config
+import threading
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -111,20 +112,23 @@ class EarScopeModel:
             print("Gagal mengirim video: File tidak ditemukan!")
             return
 
-        with open(self.raw_filename, "rb") as raw_video, open(self.bbox_filename, "rb") as processed_video:
-            files = {
-                "raw_video": (os.path.basename(self.raw_filename), raw_video, "video/mp4"),
-                "processed_video": (os.path.basename(self.bbox_filename), processed_video, "video/mp4"),
-            }
+        def upload():
+            with open(self.raw_filename, "rb") as raw_video, open(self.bbox_filename, "rb") as processed_video:
+                files = {
+                    "raw_video": (os.path.basename(self.raw_filename), raw_video, "video/mp4"),
+                    "processed_video": (os.path.basename(self.bbox_filename), processed_video, "video/mp4"),
+                }
 
-            try:
-                #response = requests.post(self.api_url, headers=self.headers, files=files)
-                response = requests.post(self.api_url, files=files)
-                if response.status_code == 201:
-                    print("Video berhasil dikirim ke API!")
-                    print(f"API Response: {response.json()}")
-                else:
-                    print(f"Gagal mengirim video: {response.status_code}, {response.text}")
+                try:
+                    #response = requests.post(self.api_url, headers=self.headers, files=files)
+                    response = requests.post(self.api_url, files=files, timeout=30)
+                    if response.status_code == 201:
+                        print("Video berhasil dikirim ke API!")
+                        print(f"API Response: {response.json()}")
+                    else:
+                        print(f"Gagal mengirim video: {response.status_code}, {response.text}")
 
-            except requests.RequestException as e:
-                print(f"Error mengirim video: {e}")
+                except requests.RequestException as e:
+                    print(f"Error mengirim video: {e}")
+                    
+        threading.Thread(target=upload, daemon=True).start()
