@@ -5,7 +5,7 @@ const ctx = canvasElement.getContext("2d");
 let videoStream = null;
 let sendFrames = false;
 const socket = io();
-let frameInterval = 1000 / 30;  // 20 FPS
+let frameInterval = 1000 / 24;  // 20 FPS
 let lastFrameTime = Date.now();
 
 function startCamera() {

@@ -21,7 +21,7 @@ class EarScopeModel:
         self.frame_count = 0
         self.frame_width = 640
         self.frame_height = 480
-        self.fps = 30
+        self.fps = 24
         self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         #self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
         
