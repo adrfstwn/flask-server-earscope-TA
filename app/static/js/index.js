@@ -41,7 +41,7 @@ function processFrames() {
   const imageData = canvasElement.toDataURL("image/jpeg", 0.7);
   socket.emit("process_frame", { image: imageData });
 
-  setTiemout(processFrames, 50);
+  setTimeout(processFrames, 50);
   // setTimeout(processFrames, 35);
   //requestAnimationFrame(processFrames);
 }
