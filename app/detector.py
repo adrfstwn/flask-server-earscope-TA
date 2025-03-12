@@ -2,7 +2,6 @@ from earscope_model.earscope_model import EarScopeModel
 import base64
 import numpy as np
 import cv2
-
 # Inisialisasi model (hanya sekali)
 model = EarScopeModel()
 

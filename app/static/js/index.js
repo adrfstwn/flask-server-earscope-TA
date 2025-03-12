@@ -5,6 +5,8 @@ const ctx = canvasElement.getContext("2d");
 let videoStream = null;
 let sendFrames = false;
 const socket = io();
+let frameInterval = 1000 / 24;  // 20 FPS
+let lastFrameTime = Date.now();
 
 function startCamera() {
   if (videoStream) return;
@@ -34,16 +36,23 @@ function stopCamera() {
 function processFrames() {
   if (!sendFrames || !videoStream) return;
 
+  let now = Date.now();
+  if (now - lastFrameTime < frameInterval) {
+      requestAnimationFrame(processFrames);
+      return;
+  }
+  lastFrameTime = now;
+
   canvasElement.width = videoElement.videoWidth;
   canvasElement.height = videoElement.videoHeight;
   ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
-  const imageData = canvasElement.toDataURL("image/jpeg", 0.7);
+  const imageData = canvasElement.toDataURL("image/jpeg", 0.6);
+  // const imageData = canvasElement.toDataURL("image/jpeg", 0.7);
   socket.emit("process_frame", { image: imageData });
 
-  setTimeout(processFrames, 50);
-  // setTimeout(processFrames, 35);
-  //requestAnimationFrame(processFrames);
+  // setTimeout(processFrames, 50);
+  requestAnimationFrame(processFrames);
 }
 
 function startRecording() {

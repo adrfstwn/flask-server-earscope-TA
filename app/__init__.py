@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 
 db = SQLAlchemy()
 migrate = Migrate()
-socketio = SocketIO(cors_allowed_origins="*", async_mode="asgi")
+socketio = SocketIO(cors_allowed_origins="*")
 #socketio = SocketIO(cors_allowed_origins="*", async_mode="eventlet")
 
 def create_app():
