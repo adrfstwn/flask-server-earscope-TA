@@ -34,4 +34,4 @@ COPY . .
 EXPOSE 5000
 
 # Menjalankan aplikasi dengan Gunicorn
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "-k", "eventlet", "-w", "4","--worker-connections", "1000", "-b", "0.0.0.0:5000", "run:app"]
