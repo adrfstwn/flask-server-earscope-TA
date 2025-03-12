@@ -11,7 +11,7 @@ import time
 model = EarScopeModel()
 
 # Queue untuk frame yang akan diproses
-frame_queue = queue.Queue(maxsize=10)  # Batasi kapasitas queue agar tidak overload
+frame_queue = queue.Queue(maxsize=100)  # Batasi kapasitas queue agar tidak overload
 
 def process_frame_with_model(image_data):
     """
