@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, send_from_directory
-from app.detector import process_frame_with_model, start_recording, stop_recording
+from app.detector import process_frame_with_model, start_recording, stop_recording, frame_queue
 
 bp = Blueprint('main', __name__)
 
@@ -18,26 +18,45 @@ def index_page():
 
 # Fungsi untuk menangani event WebSocket
 def handle_process_frame(data):
-    from app import socketio 
     try:
         image_data = data.get('image')
         if not image_data:
+            from app import socketio
             socketio.emit('processed_frame', {'error': 'No image data provided'})
             return
         
-        print("Processing frame...")  # Debug log
-        processed_image = process_frame_with_model(image_data)  # Proses gambar
-
-        if processed_image:
-            print("Sending processed frame back to frontend")  # Debug log
-            socketio.emit('processed_frame', {'processed_image': processed_image})  # Kirim segera ke frontend
+        # Tambahkan frame ke queue untuk diproses oleh thread
+        from app.detector import frame_queue
+        if not frame_queue.full():
+            frame_queue.put(image_data)
         else:
-            print("Failed to process frame.")  # Debug log
-            socketio.emit('processed_frame', {'error': 'Frame processing failed'})
-
+            print("Queue is full. Dropping frame.")
     except Exception as e:
-        print(f"Error processing frame: {e}")
+        print(f"Error handling frame: {e}")
+        from app import socketio
         socketio.emit('processed_frame', {'error': str(e)})
+        
+# def handle_process_frame(data):
+#     from app import socketio 
+#     try:
+#         image_data = data.get('image')
+#         if not image_data:
+#             socketio.emit('processed_frame', {'error': 'No image data provided'})
+#             return
+        
+#         print("Processing frame...")  # Debug log
+#         processed_image = process_frame_with_model(image_data)  # Proses gambar
+
+#         if processed_image:
+#             print("Sending processed frame back to frontend")  # Debug log
+#             socketio.emit('processed_frame', {'processed_image': processed_image})  # Kirim segera ke frontend
+#         else:
+#             print("Failed to process frame.")  # Debug log
+#             socketio.emit('processed_frame', {'error': 'Frame processing failed'})
+
+#     except Exception as e:
+#         print(f"Error processing frame: {e}")
+#         socketio.emit('processed_frame', {'error': str(e)})
 
 
 # Registrasi event WebSocket
