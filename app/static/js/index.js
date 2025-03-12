@@ -41,7 +41,8 @@ function processFrames() {
   const imageData = canvasElement.toDataURL("image/jpeg", 0.7);
   socket.emit("process_frame", { image: imageData });
 
-  setTimeout(processFrames, 100);
+  setTimeout(processFrames, 40);
+  //requestAnimationFrame(processFrames);
 }
 
 function startRecording() {

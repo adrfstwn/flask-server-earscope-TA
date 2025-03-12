@@ -1,5 +1,4 @@
-import os
-from flask import Blueprint, render_template, send_from_directory, current_app
+from flask import Blueprint, render_template, send_from_directory
 from app.detector import process_frame_with_model, start_recording, stop_recording
 
 bp = Blueprint('main', __name__)
