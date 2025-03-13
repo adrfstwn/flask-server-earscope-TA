@@ -1,10 +1,11 @@
 pipeline {
-    agent any
+    agent dockerfile {
+        additionalBuildArgs '--no-cache'
+    }
     environment {
         IMAGE_TAG = "${env.BUILD_ID}"
         GIT_BRANCH = "main"
         DOCKER_IMAGE_NAME = "earscope-model"
-        REMOTE_WORKDIR = "/var/www/flask-server-TA"
     }
     stages {
         stage('Checkout Code') {
@@ -35,46 +36,17 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to VPS Earscope') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'vps-earscope', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                    dir('flask-server-earscope-TA') {
                         sh """
-                        echo "Copying project files to VPS..."
-                        rsync -avz -e "ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no -p 9802" flask-server-earscope-TA/ \${SSH_USER}@103.155.246.50:${REMOTE_WORKDIR}
+                        echo "Building Docker image with tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}..."
+                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
 
-                        echo "Running deployment commands on VPS..."
-                        ssh -i \${SSH_KEY} -o StrictHostKeyChecking=no -p 9802 \${SSH_USER}@103.155.246.50 << EOF
-                            cd ${REMOTE_WORKDIR}
-
-                            echo "Stopping running containers..."
-                            if docker ps -a | grep earscope-model; then
-                                docker compose down || true
-                            fi
-
-                            echo "Checking if old image exists..."
-                            OLD_IMAGE_ID=\$(docker images -q ${DOCKER_IMAGE_NAME})
-
-                            if [ ! -z "\$OLD_IMAGE_ID" ]; then
-                                echo "Deleting old image..."
-                                docker rmi -f \$OLD_IMAGE_ID
-                            else
-                                echo "No old image found, skipping delete step."
-                            fi
-
-                            echo "Updating docker-compose.yml with new image tag..."
-                            sed -i "s|image:.*|image: ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}|" docker-compose.yml
-
-                            echo "Building Docker image..."
-                            docker compose build --no-cache
-
-                            echo "Deploying container..."
-                            docker compose up -d --force-recreate
-
-                            echo "Checking working directory in the container..."
-                            docker exec earscope-model pwd
-                            docker exec earscope-model ls -al /app
-                        EOF
+                        echo "Checking size of the built Docker image..."
+                        IMAGE_SIZE=\$(docker images --format "{{.Size}}" ${DOCKER_IMAGE_NAME}:${IMAGE_TAG})
+                        echo "Size of Docker image '${DOCKER_IMAGE_NAME}:${IMAGE_TAG}': \$IMAGE_SIZE"
                         """
                     }
                 }
