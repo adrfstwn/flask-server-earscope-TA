@@ -1,6 +1,9 @@
 pipeline {
-    agent dockerfile {
-        additionalBuildArgs '--no-cache'
+    agent {
+        dockerfile {
+            filename 'Dockerfile' // Nama file Dockerfile (default: Dockerfile)
+            additionalBuildArgs '--no-cache' // Opsional: argumen tambahan untuk build
+        }
     }
     environment {
         IMAGE_TAG = "${env.BUILD_ID}"
@@ -46,7 +49,7 @@ pipeline {
 
                         echo "Checking size of the built Docker image..."
                         IMAGE_SIZE=\$(docker images --format "{{.Size}}" ${DOCKER_IMAGE_NAME}:${IMAGE_TAG})
-                        echo "Size of Docker image '${DOCKER_IMAGE_NAME}:${IMAGE_TAG}': \$IMAGE_SIZE"
+                        echo "Size of Docker image '${DOCKER_IMAGE_NAME}:${IMAGE_TAG}': \$IMAGE_SIZE
                         """
                     }
                 }
