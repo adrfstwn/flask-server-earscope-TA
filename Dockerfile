@@ -34,6 +34,6 @@ COPY . .
 EXPOSE 5000
 
 # Menjalankan aplikasi dengan Gunicorn
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "--threads", "4", "--worker-connections", "2000", "--keep-alive", "1000", "-b", "0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "run:app"]
 
 # gunicorn -k eventlet -w 1 --threads 4 --worker-connections 2000 --keep-alive 5 --log-level=warning --preload -b 0.0.0.0:5000 run:app
