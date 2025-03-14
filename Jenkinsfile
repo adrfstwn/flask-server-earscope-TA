@@ -35,22 +35,6 @@ pipeline {
                 }
             }
         }
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    dir('flask-server-earscope-TA') {
-                        sh """
-                        echo "Building Docker image with tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}..."
-                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
-
-                        echo "Checking size of the built Docker image..."
-                        IMAGE_SIZE=\$(docker images --format "{{.Size}}" ${DOCKER_IMAGE_NAME}:${IMAGE_TAG})
-                        echo "Size of Docker image '${DOCKER_IMAGE_NAME}:${IMAGE_TAG}': \$IMAGE_SIZE"
-                        """
-                    }
-                }
-            }
-        }
         stage('Deploy to VPS Earscope') {
             steps {
                 script {
@@ -68,6 +52,10 @@ pipeline {
                                 docker compose down || true
                             fi
 
+                            echo "Checking size of the built Docker image..."
+                            IMAGE_SIZE=\$(docker images --format "{{.Size}}" ${DOCKER_IMAGE_NAME}:${IMAGE_TAG})
+                            echo "Size of Docker image '${DOCKER_IMAGE_NAME}:${IMAGE_TAG}': \$IMAGE_SIZE"
+
                             echo "Checking if old image exists..."
                             OLD_IMAGE_ID=\$(docker images -q ${DOCKER_IMAGE_NAME})
 
@@ -81,8 +69,8 @@ pipeline {
                             echo "Updating docker-compose.yml with new image tag..."
                             sed -i "s|image:.*|image: ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}|" docker-compose.yml
 
-                            echo "Pulling new Docker image from Jenkins..."
-                            docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                            echo "Building new Docker image..."
+                            docker compose build
 
                             echo "Deploying container..."
                             docker compose up -d --force-recreate
