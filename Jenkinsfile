@@ -92,8 +92,8 @@ pipeline {
         failure {
             echo "Pipeline failed!"
         }
-        always {
-            cleanWs()
-        }
+        // always {
+        //     cleanWs()
+        // }
     }
 }
