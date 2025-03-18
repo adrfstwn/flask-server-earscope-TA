@@ -1,8 +1,8 @@
-# Judulnya Bismillah Lulus!!
+# Judulnya Bismillah Lulus!! 👨‍🎓👨‍🎓
 
 # Project Tugas Akhir: Sistem Deteksi Dini Penyakit Telinga Berbasis Deep Learning Terintegrasi Kamera Endoskopi & Website Interaktif
 
-## Setup Project
+## 🔆Setup adn Run Project
 
 1. Create Virtual Environment:
 
@@ -42,7 +42,8 @@
     ./dist/run
     ```
 
-## If you want to get Image Docker just pull
+
+## 🔆 Just Pull the Docker Image if you dont want to get any problem 😂
 
 ```bash
 docker pull adrfstwn/earscope-model:latest
