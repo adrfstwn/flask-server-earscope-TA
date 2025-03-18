@@ -1,47 +1,54 @@
-# Judulnya Bismillah Lulus!! 👨‍🎓👨‍🎓
+# 🎓 Bismillah Lulus!! 🎓
 
-# Project Tugas Akhir: Sistem Deteksi Dini Penyakit Telinga Berbasis Deep Learning Terintegrasi Kamera Endoskopi & Website Interaktif
+## 🎯 Project Tugas Akhir  
+**Sistem Deteksi Dini Penyakit Telinga Berbasis Deep Learning Terintegrasi Kamera Endoskopi & Website Interaktif**
 
-## 🔆Setup adn Run Project
+---
 
-1. Create Virtual Environment:
+## 🔆 Setup and Run Project  
 
-    linux
-    ```bash
-    python3 -m venv venv
-    ```
-    windows
-    ```bash
-    python -m venv venv
-    ```
-1. Use the Virtual Environment:
+### 1️⃣ Create Virtual Environment  
 
-    linux
-    ```bash
-    source venv/bin/activate
-    ```
-    linux
-    ```bash
-    venv/Scripts/activate
-    ```
-3. Install Package:
-    ```bash
-    pip install -r requirements.txt
-    ```
-2. Run:
+**Linux**  
+```bash
+python3 -m venv venv
+```
+**Windows**  
+```bash
+python -m venv venv
+```
 
-    web basedd
-    ```bash
-    flask run
-    ```
-    app based
-    ```bash
-    pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
-    ```
-    ```bash
-    ./dist/run
-    ```
+### 2️⃣ Use the Virtual Environment  
 
+**Linux**  
+```bash
+source venv/bin/activate
+```
+**Windows**  
+```bash
+venv/Scripts/activate
+```
+
+### 3️⃣ Install all Package
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Run App
+
+**Web Based**  
+```bash
+flask run
+```
+
+**App Based**  
+```bash
+pyinstaller --onefile --add-data "app/templates:templates" --add-data "app/static:static" --add-data "config.py:." run.py
+```
+```bash
+./dist/run
+```
 
 ## 🔆 Just Pull the Docker Image if you dont want to get any problem 😂
 
