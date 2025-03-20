@@ -1,5 +1,3 @@
-# Bismillah Lulus!!
-
 name: Pipeline Earscope Model Build and Push Image
 
 on:
@@ -19,13 +17,30 @@ jobs:
       - name: Login to Dockerhub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-      
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest .
-    
-      - name: Push Docker Image
+
+      - name: Extract Version from Git Tag or Commit Hash
+        id: extract_version
         run: |
+          # Jika ada git tag, gunakan sebagai versi
+          if [ -n "$GITHUB_REF_NAME" ] && [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            VERSION=$GITHUB_REF_NAME
+          else
+            # Jika tidak ada tag, gunakan commit hash pendek sebagai versi
+            VERSION=$(echo $GITHUB_SHA | cut -c1-7)
+          fi
+          echo "Extracted version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      - name: Build Docker Images with Multiple Tags
+        run: |
+          # Build image dengan tag latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest .
+          # Build image dengan tag berdasarkan versi
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }} .
+
+      - name: Push Docker Images
+        run: |
+          # Push image dengan tag latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest
-
-
-
+          # Push image dengan tag berdasarkan versi
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }}
