@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - "v*"
+      - "v*" # Trigger pipeline jika ada tag dengan awalan 'v'
   workflow_dispatch:
 
 jobs:
@@ -13,13 +13,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Langkah 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Langkah 2: Login ke Docker Hub
       - name: Login to Dockerhub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
+      # Langkah 3: Ekstraksi Versi dari Tag Git atau Commit Hash
       - name: Extract Version from Git Tag or Commit Hash
         id: extract_version
         run: |
@@ -36,6 +39,11 @@ jobs:
           echo "Extracted version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_ENV
 
+      # Langkah 4: Debugging Environment Variables (Opsional)
+      - name: Debug Environment Variables
+        run: env
+
+      # Langkah 5: Build Docker Images dengan Multiple Tags
       - name: Build Docker Images with Multiple Tags
         run: |
           # Build image dengan tag latest
@@ -43,6 +51,7 @@ jobs:
           # Build image dengan tag berdasarkan versi
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }} .
 
+      # Langkah 6: Push Docker Images
       - name: Push Docker Images
         run: |
           # Push image dengan tag latest
