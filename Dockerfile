@@ -1,4 +1,4 @@
-# Menggunakan image Python sebagai base image
+# Menggunakan image Python Slim sebagai base image
 FROM python:3.12-slim
 
 # Install dependencies yang dibutuhkan OpenCV dan PyInstaller
