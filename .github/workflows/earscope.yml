@@ -61,7 +61,7 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
 
           # Clone repo pakai token agar bisa push perubahan
-          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/adrfstwn/argocd-k8s-repo.git repo
+          git clone https://${{ secrets.GH_PA }}@github.com/adrfstwn/argocd-k8s-repo.git repo
           cd repo
 
           # Update file deployment.yaml untuk memicu ArgoCD sync
