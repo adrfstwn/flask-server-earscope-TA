@@ -39,22 +39,22 @@ jobs:
           echo "Extracted version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_ENV
 
-      # Langkah 4: Debugging Environment Variables (Opsional)
-      - name: Debug Environment Variables
-        run: env
-
-      # Langkah 5: Build Docker Images dengan Multiple Tags
-      - name: Build Docker Images with Multiple Tags
+    # Langkah 5: Build Docker Image
+      - name: Build Docker Image
         run: |
-          # Build image dengan tag latest
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest .
-          # Build image dengan tag berdasarkan versi
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }} .
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest .
+          fi
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }} .
+          fi
 
-      # Langkah 6: Push Docker Images
-      - name: Push Docker Images
+    # Langkah 6: Push Docker Image
+      - name: Push Docker Image
         run: |
-          # Push image dengan tag latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest
-          # Push image dengan tag berdasarkan versi
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }}
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:latest
+          fi
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }}
+          fi
