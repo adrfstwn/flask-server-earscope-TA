@@ -65,9 +65,9 @@ jobs:
           cd repo
 
           # Update file deployment.yaml untuk memicu ArgoCD sync
-          sed -i "s|image: adrfstwn/earscope-model:latest.*|image: adrfstwn/earscope-model:latest # $(date +%s)|" earscope-app-kustomize/overlays/development/development.yaml
+          sed -i "s|image: adrfstwn/earscope-model:latest.*|image: adrfstwn/earscope-model:latest # $(date +%s)|" earscope-apps-kustomize/overlays/development/development.yaml
 
           # Commit & push perubahan
-          git add earscope-app-kustomize/overlays/development/development.yaml
+          git add earscope-apps-kustomize/overlays/development/development.yaml
           git commit -m "Trigger ArgoCD sync with latest image update"
           git push
