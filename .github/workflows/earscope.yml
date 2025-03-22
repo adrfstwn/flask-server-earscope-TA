@@ -27,19 +27,14 @@ jobs:
         id: extract_version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            # Jika ada tag Git, gunakan sebagai versi
             VERSION=${GITHUB_REF#refs/tags/}
-          elif [ -n "$GITHUB_REF_NAME" ] && [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            # Jika ada tag Git dalam format semantik
-            VERSION=$GITHUB_REF_NAME
           else
-            # Jika tidak ada tag, gunakan commit hash pendek sebagai fallback
             VERSION=$(echo $GITHUB_SHA | cut -c1-7)
           fi
           echo "Extracted version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_ENV
 
-    # Langkah 5: Build Docker Image
+      # Langkah 4: Build Docker Image
       - name: Build Docker Image
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -49,7 +44,7 @@ jobs:
             docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }} .
           fi
 
-    # Langkah 6: Push Docker Image
+      # Langkah 5: Push Docker Image
       - name: Push Docker Image
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -58,3 +53,21 @@ jobs:
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/earscope-model:${{ env.version }}
           fi
+
+      # Langkah 6: Force Update Deployment YAML in GitHub Repo
+      - name: Force Update Deployment YAML in GitHub Repo
+        run: |
+          git config --global user.email "bot@example.com"
+          git config --global user.name "GitHub Actions Bot"
+
+          # Clone repo pakai token agar bisa push perubahan
+          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/adrfstwn/argocd-k8s-repo.git repo
+          cd repo
+
+          # Update file deployment.yaml untuk memicu ArgoCD sync
+          sed -i "s|image: adrfstwn/earscope-model:latest.*|image: adrfstwn/earscope-model:latest # $(date +%s)|" earscope-app-kustomize/overlays/development/development.yaml
+
+          # Commit & push perubahan
+          git add earscope-app-kustomize/overlays/development/development.yaml
+          git commit -m "Trigger ArgoCD sync with latest image update"
+          git push
