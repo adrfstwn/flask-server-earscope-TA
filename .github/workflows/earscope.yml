@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # Langkah 3: Ekstraksi Versi dari Tag Git atau Commit Hash
+      # Langkah 3: Ekstraksi Tag tau Commit
       - name: Extract Version from Git Tag or Commit Hash
         id: extract_version
         run: |
@@ -61,3 +61,26 @@ jobs:
           git add earscope-apps-kustomize/overlays/development/development.yaml
           git commit -m "Trigger ArgoCD sync with new image tag: ${{ env.version }}"
           git push
+
+      # Langkah 7: Opsional rm old docker img
+      - name: Cleanup Old Docker Images
+        run: |
+          TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
+            -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+            https://hub.docker.com/v2/users/login/ | jq -r .token)
+      
+          IMAGES=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/earscope-model/tags?page_size=100" | jq -r '.results[].name')
+      
+          for TAG in $IMAGES; do
+            if [[ $TAG == latest-* ]]; then
+              TIMESTAMP=$(echo $TAG | cut -d'-' -f2)
+              AGE=$(( $(date +%s) - TIMESTAMP ))
+              if [[ $AGE -gt 604800 ]]; then  # 7 hari = 604800 detik
+                curl -X DELETE -H "Authorization: Bearer $TOKEN" \
+                  "https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/earscope-model/tags/$TAG/"
+                echo "Deleted old image tag: $TAG"
+              fi
+            fi
+          done
+
