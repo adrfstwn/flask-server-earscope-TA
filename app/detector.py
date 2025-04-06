@@ -7,10 +7,10 @@ import queue
 from threading import Thread
 import time
 
-# Inisialisasi model (hanya sekali)
+# Inisialisasi model 
 model = EarScopeModel()
 
-# Queue untuk frame yang akan diproses
+# Queue frame
 frame_queue = queue.Queue(maxsize=100)  # Batasi kapasitas queue agar tidak overload
 
 def process_frame_with_model(image_data):
